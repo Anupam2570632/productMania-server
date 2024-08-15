@@ -33,11 +33,58 @@ async function run() {
 
         const productsCollection = client.db('productMania').collection('products')
 
+        app.get('/products', async (req, res) => {
+            try {
+                const productName = req.query.name;
+        
+                // Create a query to search for products that match the given name
+                const query = productName ? { productName: { $regex: new RegExp(productName, 'i') } } : {};
+        
+                // Fetch products from the collection based on the query
+                const result = await productsCollection.find(query).toArray();
+        
+                // Send the result back to the client
+                res.send(result);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                res.status(500).send({ error: 'An error occurred while fetching products' });
+            }
+        });
 
-        app.get('/products', async(req, res)=>{
-            const result = await productsCollection.find().toArray()
-            res.send(result)
-        })
+        app.get('/unique-values', async (req, res) => {
+            try {
+                // Aggregate pipeline to get unique brand names and categories
+                const aggregationPipeline = [
+                    {
+                        $group: {
+                            _id: null,
+                            uniqueBrands: { $addToSet: "$brandName" },
+                            uniqueCategories: { $addToSet: "$category" }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            uniqueBrands: 1,
+                            uniqueCategories: 1
+                        }
+                    }
+                ];
+        
+                // Execute aggregation
+                const [result] = await productsCollection.aggregate(aggregationPipeline).toArray();
+        
+                // Send the unique values back to the client
+                res.send(result);
+            } catch (error) {
+                console.error('Error fetching unique values:', error);
+                res.status(500).send({ error: 'An error occurred while fetching unique values' });
+            }
+        });
+        
+        
+        
+
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         // Send a ping to confirm a successful connection
