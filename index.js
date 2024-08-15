@@ -37,6 +37,7 @@ async function run() {
             try {
                 const productName = req.query?.name;
                 const brandName = req.query?.brandName;
+                const category = req.query?.categoryName;
 
                 // Create a query object
                 const query = {};
@@ -49,6 +50,10 @@ async function run() {
                 // Add condition for brandName if it exists
                 if (brandName) {
                     query.brandName = brandName;
+                }
+                //Add condition for category name if it exist
+                if(category){
+                    query.category = category;
                 }
                 // Fetch products from the collection based on the query
                 const result = await productsCollection.find(query).toArray();
