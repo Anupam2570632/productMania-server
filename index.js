@@ -35,14 +35,24 @@ async function run() {
 
         app.get('/products', async (req, res) => {
             try {
-                const productName = req.query.name;
-        
-                // Create a query to search for products that match the given name
-                const query = productName ? { productName: { $regex: new RegExp(productName, 'i') } } : {};
-        
+                const productName = req.query?.name;
+                const brandName = req.query?.brandName;
+
+                // Create a query object
+                const query = {};
+
+                // Add condition for productName if it exists
+                if (productName) {
+                    query.productName = { $regex: new RegExp(productName, 'i') }; // Case-insensitive search
+                }
+
+                // Add condition for brandName if it exists
+                if (brandName) {
+                    query.brandName = brandName;
+                }
                 // Fetch products from the collection based on the query
                 const result = await productsCollection.find(query).toArray();
-        
+
                 // Send the result back to the client
                 res.send(result);
             } catch (error) {
@@ -70,10 +80,10 @@ async function run() {
                         }
                     }
                 ];
-        
+
                 // Execute aggregation
                 const [result] = await productsCollection.aggregate(aggregationPipeline).toArray();
-        
+
                 // Send the unique values back to the client
                 res.send(result);
             } catch (error) {
@@ -81,9 +91,9 @@ async function run() {
                 res.status(500).send({ error: 'An error occurred while fetching unique values' });
             }
         });
-        
-        
-        
+
+
+
 
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
