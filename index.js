@@ -38,10 +38,12 @@ async function run() {
                 const productName = req.query?.name;
                 const brandName = req.query?.brandName;
                 const category = req.query?.categoryName;
+                const minPrice = parseFloat(req.query?.minPrice);
+                const maxPrice = parseFloat(req.query?.maxPrice);
 
                 // Create a query object
                 const query = {};
-
+                
                 // Add condition for productName if it exists
                 if (productName) {
                     query.productName = { $regex: new RegExp(productName, 'i') }; // Case-insensitive search
@@ -52,9 +54,19 @@ async function run() {
                     query.brandName = brandName;
                 }
                 //Add condition for category name if it exist
-                if(category){
+                if (category) {
                     query.category = category;
                 }
+
+                // Add conditions for price range if they exist
+                if (!isNaN(minPrice) && !isNaN(maxPrice)) {
+                    query.price = { $gte: minPrice, $lte: maxPrice };
+                } else if (!isNaN(minPrice)) {
+                    query.price = { $gte: minPrice };
+                } else if (!isNaN(maxPrice)) {
+                    query.price = { $lte: maxPrice };
+                }
+
                 // Fetch products from the collection based on the query
                 const result = await productsCollection.find(query).toArray();
 
