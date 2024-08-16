@@ -42,6 +42,9 @@ async function run() {
                 const maxPrice = parseFloat(req.query?.maxPrice);
                 const sort = req.query?.sort;
                 const sortByDate = req.query?.sortByDate;
+                const page = parseInt(req.query?.page) || 1; // Default to page 1 if not provided
+                const limit = parseInt(req.query?.limit) || 8; // Default to 8 products per page if not provided
+
 
                 // Create a query object
                 const query = {};
@@ -55,7 +58,7 @@ async function run() {
                 if (brandName) {
                     query.brandName = brandName;
                 }
-                //Add condition for category name if it exist
+                // Add condition for category name if it exists
                 if (category) {
                     query.category = category;
                 }
@@ -72,25 +75,40 @@ async function run() {
                 // Fetch products from the collection
                 let cursor = productsCollection.find(query);
 
-                // Apply sorting only if the 'sort' parameter is provided
+                // Apply sorting if the 'sort' parameter is provided
                 if (sort) {
                     const sortDirection = sort === 'asc' ? 1 : -1; // 1 for asc, -1 for desc
                     cursor = cursor.sort({ price: sortDirection });
                 }
 
+                // Apply sorting by date if the 'sortByDate' parameter is provided
                 if (sortByDate === 'recent') {
                     cursor = cursor.sort({ creationDateTime: -1 }); // Sort by date descending (recent first)
                 }
 
+                // Apply pagination
+                const skip = (page - 1) * limit;
+                cursor = cursor.skip(skip).limit(limit);
+
+                // Fetch the paginated products
                 const result = await cursor.toArray();
 
-                // Send the result back to the client
-                res.send(result);
+                // Calculate total number of documents for pagination
+                const totalProducts = await productsCollection.countDocuments(query);
+                const totalPages = Math.ceil(totalProducts / limit);
+
+                // Send the result along with pagination info
+                res.send({
+                    products: result,
+                    totalPages: totalPages,
+                    currentPage: page,
+                });
             } catch (error) {
                 console.error('Error fetching products:', error);
                 res.status(500).send({ error: 'An error occurred while fetching products' });
             }
         });
+
 
         app.get('/unique-values', async (req, res) => {
             try {
