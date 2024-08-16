@@ -40,10 +40,12 @@ async function run() {
                 const category = req.query?.categoryName;
                 const minPrice = parseFloat(req.query?.minPrice);
                 const maxPrice = parseFloat(req.query?.maxPrice);
+                const sort = req.query?.sort;
+                const sortByDate = req.query?.sortByDate;
 
                 // Create a query object
                 const query = {};
-                
+
                 // Add condition for productName if it exists
                 if (productName) {
                     query.productName = { $regex: new RegExp(productName, 'i') }; // Case-insensitive search
@@ -67,8 +69,20 @@ async function run() {
                     query.price = { $lte: maxPrice };
                 }
 
-                // Fetch products from the collection based on the query
-                const result = await productsCollection.find(query).toArray();
+                // Fetch products from the collection
+                let cursor = productsCollection.find(query);
+
+                // Apply sorting only if the 'sort' parameter is provided
+                if (sort) {
+                    const sortDirection = sort === 'asc' ? 1 : -1; // 1 for asc, -1 for desc
+                    cursor = cursor.sort({ price: sortDirection });
+                }
+
+                if (sortByDate === 'recent') {
+                    cursor = cursor.sort({ creationDateTime: -1 }); // Sort by date descending (recent first)
+                }
+
+                const result = await cursor.toArray();
 
                 // Send the result back to the client
                 res.send(result);
