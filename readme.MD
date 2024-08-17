@@ -1,6 +1,7 @@
 # ProductMania Server
 
 This is the server-side code for the ProductMania website, a platform that allows users to browse and purchase products. This server provides APIs for fetching products, filtering, sorting, pagination, and retrieving unique brand names and categories.
+## Live Site - [https://product-mania-web.netlify.app/](https://product-mania-web.netlify.app/)
 
 ## Features
 
@@ -27,12 +28,23 @@ This is the server-side code for the ProductMania website, a platform that allow
   - `DB_user`: productManiaAdmin
   - `DB_password`: pviISGRsWMybGnmE
 
-### Installation
+### Run this server locally
 
 1. Clone the repository:
-   ```bash
+   ````bash
    git clone https://github.com/Anupam2570632/productMania-server
-   
-   cd ProductMania-server
+   ````
+2.Go to File directory:
+```bash
+cd ProductMania-server
+```
+3.Download Dependencies:
+```bash
+npm install
+```
+4.Run the server:
+    ```bash
+    node index.js
+    ```
 
-   npm install
+#### The frontend should now be running on http://localhost:5000/.
