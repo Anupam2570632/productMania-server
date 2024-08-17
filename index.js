@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 app.use(express.json())
@@ -64,7 +64,7 @@ async function run() {
                     query.category = category;
                 }
 
-               
+
 
                 // Add conditions for price range if they exist
                 if (!isNaN(minPrice) && !isNaN(maxPrice)) {
@@ -78,7 +78,7 @@ async function run() {
                 // Fetch products from the collection
                 let cursor = productsCollection.find(query);
 
-                
+
 
                 // Apply sorting if the 'sort' parameter is provided
                 if (sort) {
@@ -117,6 +117,16 @@ async function run() {
                 res.status(500).send({ error: 'An error occurred while fetching products' });
             }
         });
+
+        //find one product by id
+        app.get('/product/:id', async (req, res) => {
+            const pId = req.params?.id
+            const id = new ObjectId(pId)
+            const query = { _id: id }
+            const result = await productsCollection.findOne(query)
+            res.send(result)
+        })
+
 
 
         app.get('/unique-values', async (req, res) => {
