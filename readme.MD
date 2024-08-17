@@ -43,8 +43,8 @@ cd ProductMania-server
 npm install
 ```
 4.Run the server:
-    ```bash
-    node index.js
-    ```
+```bash
+node index.js
+```
 
 #### The frontend should now be running on http://localhost:5000/.

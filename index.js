@@ -131,7 +131,6 @@ async function run() {
 
         app.get('/unique-values', async (req, res) => {
             try {
-                // Aggregate pipeline to get unique brand names and categories
                 const aggregationPipeline = [
                     {
                         $group: {
@@ -149,13 +148,19 @@ async function run() {
                     }
                 ];
 
-                // Execute aggregation
                 const [result] = await productsCollection.aggregate(aggregationPipeline).toArray();
-
-                // Send the unique values back to the client
-                res.send(result);
+                console.log(result)
+                if (!result) {
+                    // If no result is found, send an empty array
+                    res.send({
+                        uniqueBrands: [],
+                        uniqueCategories: []
+                    });
+                } else {
+                    res.send(result);
+                }
             } catch (error) {
-                console.error('Error fetching unique values:', error);
+                console.error('Error fetching unique values:', error.message, error.stack);
                 res.status(500).send({ error: 'An error occurred while fetching unique values' });
             }
         });
