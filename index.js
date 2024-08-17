@@ -42,6 +42,7 @@ async function run() {
                 const maxPrice = parseFloat(req.query?.maxPrice);
                 const sort = req.query?.sort;
                 const sortByDate = req.query?.sortByDate;
+                const sortByRating = req.query?.sortByRating; // New parameter for sorting by rating
                 const page = parseInt(req.query?.page) || 1; // Default to page 1 if not provided
                 const limit = parseInt(req.query?.limit) || 8; // Default to 8 products per page if not provided
 
@@ -63,6 +64,8 @@ async function run() {
                     query.category = category;
                 }
 
+               
+
                 // Add conditions for price range if they exist
                 if (!isNaN(minPrice) && !isNaN(maxPrice)) {
                     query.price = { $gte: minPrice, $lte: maxPrice };
@@ -75,6 +78,8 @@ async function run() {
                 // Fetch products from the collection
                 let cursor = productsCollection.find(query);
 
+                
+
                 // Apply sorting if the 'sort' parameter is provided
                 if (sort) {
                     const sortDirection = sort === 'asc' ? 1 : -1; // 1 for asc, -1 for desc
@@ -84,6 +89,10 @@ async function run() {
                 // Apply sorting by date if the 'sortByDate' parameter is provided
                 if (sortByDate === 'recent') {
                     cursor = cursor.sort({ creationDateTime: -1 }); // Sort by date descending (recent first)
+                }
+                if (sortByRating) {
+                    const ratingDirection = sortByRating === 'des' ? -1 : 1; // 1 for asc, -1 for desc
+                    cursor = cursor.sort({ ratings: ratingDirection });
                 }
 
                 // Apply pagination
